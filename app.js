@@ -105,6 +105,8 @@ router.get('/configs/:id/files/:fileName', async (req, res) => {
         .bucket('fil-gen-cli.appspot.com')
         .file(`${req.params.id}/${req.params.fileName}`);
 
+    const content = await file.download();
+
     res.send({
         content: content.toString(),
     });
