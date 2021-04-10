@@ -34,7 +34,11 @@ router.post('/configs', (req, res) =>
                 jwtFromRequest: passwortJwt.ExtractJwt.fromAuthHeaderAsBearerToken(),
             },
             async (payload, done) => {
+                console.log(('client connected with: ', payload));
+                console.log('new cli config with name: ', config.cliName);
+
                 const config = req.body;
+
                 await firebaseAdmin
                     .firestore()
                     .collection('configs')
