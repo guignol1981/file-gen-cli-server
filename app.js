@@ -7,7 +7,6 @@ const firebaseAdmin = require('firebase-admin');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
-const path = require('path');
 
 console.log(require('./service-account.json'));
 
