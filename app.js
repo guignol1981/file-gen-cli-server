@@ -7,9 +7,12 @@ const firebaseAdmin = require('firebase-admin');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
+const path = require('path');
 
 firebaseAdmin.initializeApp(
-    firebaseAdmin.credential.cert(require('./service-account.json'))
+    firebaseAdmin.credential.cert(
+        require(path.join(__dirname, './service-account.json'))
+    )
 );
 
 app.use(bodyParser.json());
