@@ -1,2 +1,2 @@
 const jwt = require('jsonwebtoken');
-console.log(jwt.sign({ clientId: 'ulaval' }, 'thisisverysecret'));
+console.log(jwt.sign({ clientId: 'ulaval' }, ''));
