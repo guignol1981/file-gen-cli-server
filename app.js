@@ -11,11 +11,11 @@ const path = require('path');
 
 console.log(require('./service-account.json'));
 
-firebaseAdmin.initializeApp(
-    firebaseAdmin.credential.cert(
+firebaseAdmin.initializeApp({
+    credential: firebaseAdmin.credential.cert(
         require(path.join(__dirname, 'service-account.json'))
-    )
-);
+    ),
+});
 
 app.use(bodyParser.json());
 app.use(passport.initialize());
