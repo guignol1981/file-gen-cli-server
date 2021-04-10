@@ -20,7 +20,7 @@ firebaseAdmin.initializeApp({
     appId: '1:484720598120:web:4e96db7b1f4b07c9f7efdd',
     measurementId: 'G-RYXZ5393XZ',
     credential: firebaseAdmin.credential.cert(
-        require(path.join(__dirname, 'service-account.json'))
+        require('service-account.json'))
     ),
 });
 
