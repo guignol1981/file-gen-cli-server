@@ -12,10 +12,16 @@ const path = require('path');
 console.log(require('./service-account.json'));
 
 firebaseAdmin.initializeApp({
+    apiKey: 'AIzaSyBKZn5TmFbPudGEN-1iKDiC6sHvZLxxW6k',
+    authDomain: 'fil-gen-cli.firebaseapp.com',
+    projectId: 'fil-gen-cli',
+    storageBucket: 'fil-gen-cli.appspot.com',
+    messagingSenderId: '484720598120',
+    appId: '1:484720598120:web:4e96db7b1f4b07c9f7efdd',
+    measurementId: 'G-RYXZ5393XZ',
     credential: firebaseAdmin.credential.cert(
         require(path.join(__dirname, 'service-account.json'))
     ),
-    storageBucket: 'fil-gen-cli.appspot.com',
 });
 
 app.use(bodyParser.json());
