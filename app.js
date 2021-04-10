@@ -8,8 +8,6 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
-console.log(require('./service-account.json'));
-
 firebaseAdmin.initializeApp({
     apiKey: 'AIzaSyBKZn5TmFbPudGEN-1iKDiC6sHvZLxxW6k',
     authDomain: 'fil-gen-cli.firebaseapp.com',
