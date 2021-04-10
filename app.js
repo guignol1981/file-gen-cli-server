@@ -15,6 +15,7 @@ firebaseAdmin.initializeApp({
     credential: firebaseAdmin.credential.cert(
         require(path.join(__dirname, 'service-account.json'))
     ),
+    storageBucket: 'fil-gen-cli.appspot.com',
 });
 
 app.use(bodyParser.json());
