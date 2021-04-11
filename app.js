@@ -33,8 +33,7 @@ passport.use(
             jwtFromRequest: passwortJwt.ExtractJwt.fromAuthHeaderAsBearerToken(),
         },
         (payload, done) => {
-            // TODO use payload in futur to group client configs
-            done();
+            done(payload.client);
         }
     )
 );
@@ -42,18 +41,45 @@ passport.use(
 app.use(express.json());
 app.use(passport.initialize());
 
+router.get('/configs', async (req, res) => {
+    const docs = await firebaseAdmin.firestore().collection('configs').get();
+    const configs = [];
+
+    docs.forEach((d) => {
+        configs.push({
+            name: d.data().cliName,
+            author: d.data().client,
+            description: d.data().description,
+        });
+    });
+    res.send({
+        ok: true,
+        configs,
+    });
+});
+
 router.post('/configs', (req, res) =>
     passport.authorize(
         'verifyToken',
-        async () => {
+        async (client) => {
             try {
                 const config = req.body;
 
-                await firebaseAdmin
+                const doc = await firebaseAdmin
                     .firestore()
                     .collection('configs')
                     .doc(config.cliName)
-                    .set(config);
+                    .get();
+
+                if (doc.exists && doc.data().client !== client) {
+                    res.status(400).send({
+                        ok: false,
+                        msg: `this cli name is already used by another client, please choose another one`,
+                    });
+                    return;
+                } else {
+                    await doc.ref.set({ ...config, ...{ client } });
+                }
 
                 await firebaseAdmin
                     .storage()
@@ -61,7 +87,8 @@ router.post('/configs', (req, res) =>
                     .deleteFiles({ prefix: config.cliName + '/' });
 
                 res.send({
-                    msg: 'done',
+                    ok: 'true',
+                    msg: 'Config saved',
                 });
             } catch (e) {
                 res.status(500).send({
@@ -76,7 +103,7 @@ router.post('/configs', (req, res) =>
 router.post('/configs/:id/files', upload.single('file'), (req, res) =>
     passport.authorize(
         'verifyToken',
-        async () => {
+        async (client) => {
             try {
                 const doc = await firebaseAdmin
                     .firestore()
@@ -94,7 +121,8 @@ router.post('/configs/:id/files', upload.single('file'), (req, res) =>
                     });
 
                 res.send({
-                    msg: 'done',
+                    ok: true,
+                    msg: `Template ${req.file.originalname} saved!`,
                 });
             } catch (e) {
                 res.status(500).send({
@@ -131,10 +159,10 @@ router.get('/configs/:id/files/:fileName', async (req, res) => {
             .bucket('fil-gen-cli.appspot.com')
             .file(`${req.params.id}/${req.params.fileName}`);
 
-        const content = await file.download();
+        const template = await file.download();
 
         res.send({
-            content: content.toString(),
+            template: template.toString(),
         });
     } catch (e) {
         res.status(500).send({
