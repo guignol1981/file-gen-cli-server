@@ -1,11 +1,10 @@
 const express = require('express');
+const multer = require('multer');
+const firebaseAdmin = require('firebase-admin');
 const app = express();
 const router = express.Router();
 const passwortJwt = require('passport-jwt');
 const passport = require('passport');
-const firebaseAdmin = require('firebase-admin');
-const bodyParser = require('body-parser');
-const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
 firebaseAdmin.initializeApp({
@@ -26,17 +25,28 @@ firebaseAdmin.initializeApp({
     }),
 });
 
-app.use(bodyParser.json());
+passport.use(
+    'verifyToken',
+    new passwortJwt.Strategy(
+        {
+            secretOrKey: process.env.APP_SECRET,
+            jwtFromRequest: passwortJwt.ExtractJwt.fromAuthHeaderAsBearerToken(),
+        },
+        (payload, done) => {
+            // TODO use payload in futur to group client configs
+            done();
+        }
+    )
+);
+
+app.use(express.json());
 app.use(passport.initialize());
 
 router.post('/configs', (req, res) =>
     passport.authorize(
-        new passwortJwt.Strategy(
-            {
-                secretOrKey: process.env.APP_SECRET || 'secret',
-                jwtFromRequest: passwortJwt.ExtractJwt.fromAuthHeaderAsBearerToken(),
-            },
-            async (payload, done) => {
+        'verifyToken',
+        async () => {
+            try {
                 const config = req.body;
 
                 await firebaseAdmin
@@ -53,20 +63,21 @@ router.post('/configs', (req, res) =>
                 res.send({
                     msg: 'done',
                 });
+            } catch (e) {
+                res.status(500).send({
+                    error: e,
+                });
             }
-        ),
+        },
         { session: false }
     )(req, res)
 );
 
 router.post('/configs/:id/files', upload.single('file'), (req, res) =>
     passport.authorize(
-        new passwortJwt.Strategy(
-            {
-                secretOrKey: process.env.APP_SECRET || 'secret',
-                jwtFromRequest: passwortJwt.ExtractJwt.fromAuthHeaderAsBearerToken(),
-            },
-            async (payload, done) => {
+        'verifyToken',
+        async () => {
+            try {
                 const doc = await firebaseAdmin
                     .firestore()
                     .collection('configs')
@@ -85,34 +96,51 @@ router.post('/configs/:id/files', upload.single('file'), (req, res) =>
                 res.send({
                     msg: 'done',
                 });
+            } catch (e) {
+                res.status(500).send({
+                    error: e,
+                });
             }
-        ),
+        },
         { session: false }
     )(req, res)
 );
 
 router.get('/configs/:id', async (req, res) => {
-    const doc = await firebaseAdmin
-        .firestore()
-        .collection('configs')
-        .doc(req.params.id)
-        .get();
-    res.send({
-        config: doc.data(),
-    });
+    try {
+        const doc = await firebaseAdmin
+            .firestore()
+            .collection('configs')
+            .doc(req.params.id)
+            .get();
+
+        res.send({
+            config: doc.data(),
+        });
+    } catch (e) {
+        res.status(500).send({
+            error: e,
+        });
+    }
 });
 
 router.get('/configs/:id/files/:fileName', async (req, res) => {
-    const file = await firebaseAdmin
-        .storage()
-        .bucket('fil-gen-cli.appspot.com')
-        .file(`${req.params.id}/${req.params.fileName}`);
+    try {
+        const file = await firebaseAdmin
+            .storage()
+            .bucket('fil-gen-cli.appspot.com')
+            .file(`${req.params.id}/${req.params.fileName}`);
 
-    const content = await file.download();
+        const content = await file.download();
 
-    res.send({
-        content: content.toString(),
-    });
+        res.send({
+            content: content.toString(),
+        });
+    } catch (e) {
+        res.status(500).send({
+            error: e,
+        });
+    }
 });
 
 app.use('/', router);
