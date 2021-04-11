@@ -18,7 +18,10 @@ firebaseAdmin.initializeApp({
     measurementId: 'G-RYXZ5393XZ',
     credential: firebaseAdmin.credential.cert({
         project_id: process.env.APP_SERVICE_ACCOUNT_PROJECT_ID,
-        private_key: process.env.APP_SERVICE_ACCOUNT_PRIVATE_KEY,
+        private_key: process.env.APP_SERVICE_ACCOUNT_PRIVATE_KEY.replace(
+            /\\n/g,
+            '\n'
+        ),
         client_email: process.env.APP_SERVICE_ACCOUNT_CLIENT_EMAIL,
     }),
 });
