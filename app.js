@@ -8,6 +8,8 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
+console.log(process.env.APP_SERVICE_ACCOUNT_PRIVATE_KEY);
+
 firebaseAdmin.initializeApp({
     apiKey: 'AIzaSyBKZn5TmFbPudGEN-1iKDiC6sHvZLxxW6k',
     authDomain: 'fil-gen-cli.firebaseapp.com',
@@ -16,9 +18,11 @@ firebaseAdmin.initializeApp({
     messagingSenderId: '484720598120',
     appId: '1:484720598120:web:4e96db7b1f4b07c9f7efdd',
     measurementId: 'G-RYXZ5393XZ',
-    credential: firebaseAdmin.credential.cert(
-        require('./service-account.json')
-    ),
+    credential: firebaseAdmin.credential.cert({
+        project_id: process.env.APP_SERVICE_ACCOUNT_PROJECT_ID,
+        private_key: process.env.APP_SERVICE_ACCOUNT_PRIVATE_KEY,
+        client_email: process.env.APP_SERVICE_ACCOUNT_CLIENT_EMAIL,
+    }),
 });
 
 app.use(bodyParser.json());
