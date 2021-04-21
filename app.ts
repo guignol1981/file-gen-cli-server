@@ -38,8 +38,19 @@ passport.use(
 app.use(express.json());
 app.use(passport.initialize());
 
-router.get('/configs', async (_req, res) => {
-    const docs = await firebaseAdmin.firestore().collection('configs').get();
+router.post('/configs/list', async (req: express.Request, res) => {
+    const tags: string[] = req.body.tags ?? [];
+    let docs;
+    if (tags.length) {
+        docs = await firebaseAdmin
+            .firestore()
+            .collection('configs')
+            .where('tags', 'array-contains-any', tags)
+            .get();
+    } else {
+        docs = await firebaseAdmin.firestore().collection('configs').get();
+    }
+
     const configs: Record<string, string>[] = [];
 
     docs.forEach((d) => {
