@@ -4,54 +4,68 @@ import { FGCInstanceName } from '../models';
 export class FCGChangeCase {
     public static AllCasingPlaceholderMap = [
         {
-            placeholder: '{{SINGULAR_CAMEL}}',
+            casing: 'PASCAL',
             casingFn: changeCase.pascalCase,
         },
         {
-            placeholder: '{{SINGULAR_CAPITAL}}',
+            casing: 'CAMEL',
+            casingFn: changeCase.camelCase,
+        },
+        {
+            casing: 'CAPITAL',
             casingFn: changeCase.capitalCase,
         },
         {
-            placeholder: '{{SINGULAR_DOT}}',
+            casing: 'DOT',
             casingFn: changeCase.dotCase,
         },
         {
-            placeholder: '{{SINGULAR_CONSTANT}}',
+            casing: 'CONSTANT',
             casingFn: changeCase.constantCase,
         },
         {
-            placeholder: '{{SINGULAR_PASCAL}}',
+            casing: 'PASCAL',
             casingFn: changeCase.pascalCase,
         },
         {
-            placeholder: '{{SINGULAR_PARAM}}',
+            casing: 'PARAM',
             casingFn: changeCase.paramCase,
         },
         {
-            placeholder: '{{SINGULAR_KEBAB}}',
+            casing: 'KEBAB',
             casingFn: changeCase.paramCase,
         },
         {
-            placeholder: '{{SINGULAR_HEADER}}',
+            casing: 'HEADER',
             casingFn: changeCase.headerCase,
         },
         {
-            placeholder: '{{SINGULAR_NO}}',
+            casing: 'NO',
             casingFn: changeCase.noCase,
         },
         {
-            placeholder: '{{SINGULAR_SENTENCE}}',
+            casing: 'SENTENCE',
             casingFn: changeCase.sentenceCase,
         },
         {
-            placeholder: '{{SINGULAR_PATH}}',
+            casing: 'PATH',
             casingFn: changeCase.pathCase,
         },
         {
-            placeholder: '{{SINGULAR_CAPITAL}}',
+            casing: 'CAPITAL',
             casingFn: changeCase.capitalCase,
         },
     ];
+
+    public static PlaceHolderConstructor(
+        casing: string,
+        prefixed = false,
+        plural = false
+    ): string {
+        return `{{${prefixed ? 'PREFIXED_' : ''}${
+            plural ? 'PLURAL_' : 'SINGULAR_'
+        }${casing}}}`;
+    }
 
     public static Replace(
         value: string,
@@ -60,24 +74,33 @@ export class FCGChangeCase {
         this.AllCasingPlaceholderMap.forEach((e) => {
             value = value
                 .replace(
-                    new RegExp(e.placeholder, 'gi'),
+                    new RegExp(this.PlaceHolderConstructor(e.casing), 'gi'),
                     e.casingFn(instanceName.singular)
                 )
                 .replace(
-                    new RegExp(e.placeholder, 'gi'),
+                    new RegExp(
+                        this.PlaceHolderConstructor(e.casing, false, true),
+                        'gi'
+                    ),
                     e.casingFn(instanceName.plural)
                 );
 
             if (instanceName.prefix) {
                 value = value
                     .replace(
-                        new RegExp(e.placeholder, 'gi'),
+                        new RegExp(
+                            this.PlaceHolderConstructor(e.casing, true),
+                            'gi'
+                        ),
                         e.casingFn(
                             `${instanceName.prefix} ${instanceName.singular}`
                         )
                     )
                     .replace(
-                        new RegExp(e.placeholder, 'gi'),
+                        new RegExp(
+                            this.PlaceHolderConstructor(e.casing, true, true),
+                            'gi'
+                        ),
                         e.casingFn(
                             `${instanceName.prefix} ${instanceName.plural}`
                         )
@@ -98,7 +121,7 @@ export class FCGChangeCase {
                         ),
                         'g'
                     ),
-                    e.placeholder
+                    this.PlaceHolderConstructor(e.casing, true, false)
                 );
                 if (instanceName.plural) {
                     value = value.replace(
@@ -108,19 +131,19 @@ export class FCGChangeCase {
                             ),
                             'g'
                         ),
-                        e.placeholder
+                        this.PlaceHolderConstructor(e.casing, true, true)
                     );
                 }
             }
 
             value = value.replace(
                 new RegExp(e.casingFn(instanceName.singular), 'g'),
-                e.placeholder
+                this.PlaceHolderConstructor(e.casing)
             );
             if (instanceName.plural) {
                 value = value.replace(
                     new RegExp(e.casingFn(instanceName.plural), 'g'),
-                    e.placeholder
+                    this.PlaceHolderConstructor(e.casing, false, true)
                 );
             }
         });
