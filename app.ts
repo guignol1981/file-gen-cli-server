@@ -10,8 +10,8 @@ import { FGCInstanceName } from './src/models';
 const upload = multer({ dest: 'uploads/' });
 
 firebaseAdmin.initializeApp({
-    projectId: 'fil-gen-cli',
-    storageBucket: 'fil-gen-cli.appspot.com',
+    projectId: 'file-gen-cli',
+    storageBucket: 'file-gen-cli.appspot.com',
     credential: firebaseAdmin.credential.cert({
         projectId: process.env.APP_SERVICE_ACCOUNT_PROJECT_ID,
         privateKey: process.env.APP_SERVICE_ACCOUNT_PRIVATE_KEY?.replace(
@@ -27,7 +27,8 @@ passport.use(
     new passwortJwt.Strategy(
         {
             secretOrKey: process.env.APP_SECRET,
-            jwtFromRequest: passwortJwt.ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest:
+                passwortJwt.ExtractJwt.fromAuthHeaderAsBearerToken(),
         },
         (payload, done) => {
             done(payload.client);
