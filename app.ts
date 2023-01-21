@@ -118,7 +118,7 @@ router.post('/configs/:id/files', upload.single('file'), (req, res) =>
 
             await firebaseAdmin
                 .storage()
-                .bucket('fil-gen-cli.appspot.com')
+                .bucket('file-gen-cli.appspot.com')
                 .upload(req.file.path, {
                     destination: `${config.cliName}/${req.file.originalname}`,
                 });
@@ -178,7 +178,7 @@ router.post('/configs/:id/files/:fileName', async (req, res) => {
     try {
         const file = await firebaseAdmin
             .storage()
-            .bucket('fil-gen-cli.appspot.com')
+            .bucket('file-gen-cli.appspot.com')
             .file(`${req.params.id}/${req.params.fileName}`);
 
         const templateRaw = await file.download();
